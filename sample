@@ -75,3 +75,13 @@ int main(int argc, char **argv)
     waitKey(0);
     return 0;
 }
+
+
+
+if (descriptors.isContinuous()) {
+    descriptorBinary.assign(descriptors.data, descriptors.data + descriptors.total()*descriptors.channels());
+} else {
+    for (int i = 0; i < descriptors.rows; ++i) {
+        descriptorBinary.insert(descriptorBinary.end(), descriptors.ptr<uchar>(i), descriptors.ptr<uchar>(i)+descriptors.cols*descriptors.channels());
+    }
+}
