@@ -93,3 +93,83 @@ Rect bbox = cv::RotatedRect(center, img.size(), angle).boundingRect();
 rot.at<double>(0,2) += bbox.width/2.0 - center.x;
 rot.at<double>(1,2) += bbox.height/2.0 - center.y;
 warpAffine(img, img1, rot, bbox.size());
+
+### Flags
+
+int32 FLAGS_logging_level: 3: Log display level [0 ~ 255] No log display at 255
+string FLAGS_image_path: "examples / media / COCO_val2014_000000000192.jpg": Image path
+string FLAGS_model_pose: "COCO": Model type (choose from COCO, MPI, MPI_4_layers)
+string FLAGS_model_folder: "models /": Path of Model (COCO / MPI) folder
+string FLAGS_net_resolution: "656x368": The resolution of the processed image, a multiple of 16.
+string FLAGS_resolution: "1280x720": Display image resolution, "-1x-1 \" forcibly specify default.
+int32 FLAGS_num_gpu_start: "0": GPU number used for calculation (can be selected if there are multiple GPUs)
+double FLAGS_scale_gap: "0.3": Scale ratio of input image and output image.
+int32 FLAGS_num_scales: "1": Scale averaging count? (Unclear, corrected later)
+double FLAGS_alpha_pose :: Alpha blend value of the skeleton of the output image [0 ~ 1]
+
+
+### Pose Extraction steps
+
+// Step 1 - Set logging level
+ op::check(0 <= FLAGS_logging_level && FLAGS_logging_level <= 255, "Wrong logging_level value.",
+              __LINE__, __FUNCTION__, __FILE__);
+
+// Step 2 - Read Google flags (user defined configuration)
+    // outputSize
+    const auto outputSize = op::flagsToPoint(FLAGS_output_resolution, "-1x-1");
+    // netInputSize
+    const auto netInputSize = op::flagsToPoint(FLAGS_net_resolution, "-1x368");
+    // poseModel
+    const auto poseModel = op::flagsToPoseModel(FLAGS_model_pose);
+    
+// Step 3 - Initialize all required classes
+    op::ScaleAndSizeExtractor scaleAndSizeExtractor(netInputSize, outputSize, FLAGS_scale_number, FLAGS_scale_gap);
+    op::CvMatToOpInput cvMatToOpInput;
+    op::CvMatToOpOutput cvMatToOpOutput;
+    op::PoseExtractorCaffe poseExtractorCaffe{poseModel, FLAGS_model_folder,
+                                              FLAGS_num_gpu_start, {}, op::ScaleMode::ZeroToOne, enableGoogleLogging};
+    op::PoseCpuRenderer poseRenderer{poseModel, (float)FLAGS_render_threshold, !FLAGS_disable_blending,
+                                     (float)FLAGS_alpha_pose};
+    op::OpOutputToCvMat opOutputToCvMat;
+    op::FrameDisplayer frameDisplayer{"OpenPose Tutorial - Example 1", outputSize};
+    
+// Step 4 - Initialize resources on desired thread (in this case single thread, i.e. we init resources here)
+    poseExtractorCaffe.initializationOnThread();
+    poseRenderer.initializationOnThread();
+
+/ ------------------------- POSE ESTIMATION AND RENDERING -------------------------
+// Step 1 - Read and load image, error if empty (possibly wrong path)
+// Alternative(Opencv function): cv::imread(FLAGS_image_path, CV_LOAD_IMAGE_COLOR);
+    cv::Mat inputImage = op::loadImage(FLAGS_image_path, CV_LOAD_IMAGE_COLOR);
+    if(inputImage.empty())
+        op::error("Could not open or find the image: " + FLAGS_image_path, __LINE__, __FUNCTION__, __FILE__);
+    const op::Point<int> imageSize{inputImage.cols, inputImage.rows};
+
+// Step 2 - Get desired scale sizes
+    std::vector<double> scaleInputToNetInputs;
+    std::vector<op::Point<int>> netInputSizes;
+    double scaleInputToOutput;
+    op::Point<int> outputResolution;
+    std::tie(scaleInputToNetInputs, netInputSizes, scaleInputToOutput, outputResolution)
+        = scaleAndSizeExtractor.extract(imageSize);
+
+// Step 3 - Format input image to OpenPose input and output formats
+    const auto netInputArray = cvMatToOpInput.createArray(inputImage, scaleInputToNetInputs, netInputSizes);
+    auto outputArray = cvMatToOpOutput.createArray(inputImage, scaleInputToOutput, outputResolution);
+
+// Step 4 - Estimate poseKeypoints
+    poseExtractorCaffe.forwardPass(netInputArray, imageSize, scaleInputToNetInputs);
+    const auto poseKeypoints = poseExtractorCaffe.getPoseKeypoints();
+
+// Step 5 - Render poseKeypoints
+    poseRenderer.renderPose(outputArray, poseKeypoints, scaleInputToOutput);
+
+// Step 6 - OpenPose output format to cv::Mat
+    auto outputImage = opOutputToCvMat.formatToCvMat(outputArray);
+    
+// ------------------------- SHOWING RESULT AND CLOSING -------------------------
+// Step 1 - Show results
+    frameDisplayer.displayFrame(outputImage, 0); // Alternative(Opencv function): cv::imshow(outputImage) + cv::waitKey(0)
+// Step 2 - Logging information message
+    op::log("Example 1 successfully finished.", op::Priority::High);
+   
