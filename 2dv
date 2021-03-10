@@ -23,3 +23,22 @@ if (detectedKeypoints[i].empty()) {
     score = 0;
   kpVector.push_back(to_string(point_x) + ","  + to_string(point_y) + "," + to_string(score));
 }
+
+
+
+
+	cv::Point maxLoc;
+
+	for (int i = 0; i < detectedKeypoints.size(); i++) {
+		for (int j = 0; j < detectedKeypoints[i].size(); j++) {
+			if (detectedKeypoints.at(i).size() < numberOfPersons) {
+				detectedKeypoints.at(i).push_back(KeyPoint(maxLoc, 0.00));
+			}
+		}
+	}
+  
+  kpVector.push_back(to_string(detectedKeypointsCopy.at(i).at(j).point.x) 
+			+ ","  
+			+ to_string(detectedKeypointsCopy.at(i).at(j).point.y)
+			+ "," 
+			+ to_string(detectedKeypointsCopy.at(i).at(j).score));
