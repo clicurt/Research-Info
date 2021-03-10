@@ -24,21 +24,47 @@ if (detectedKeypoints[i].empty()) {
   kpVector.push_back(to_string(point_x) + ","  + to_string(point_y) + "," + to_string(score));
 }
 
+int max_vec_size =  numberOfPersons;
+// int max_vec_size =  detectedKeypoints.at(0).size();
+for (int i = 0; i < detectedKeypoints.size(); i++) {
+	if (detectedKeypoints.at(i).size() > max_vec_size) {
+		max_vec_size = detectedKeypoints.at(i).size();
+	}
+	// if (max_vec_size < numberOfPersons)
+	// 	max_vec_size = numberOfPersons;
+}
+// std::cout << "max_size there : "<<max_vec_size << endl;
+cv::Point maxLoc;
+
+for (int i = 0; i < detectedKeypoints.size(); i++) {
+	while (detectedKeypoints.at(i).size() < max_vec_size) 
+		detectedKeypoints.at(i).push_back(KeyPoint(maxLoc, 0.00));
+
+	// do {
+	// 	detectedKeypoints.at(i).push_back(KeyPoint(maxLoc, 0.00));
+	// } while (detectedKeypoints.at(i).size() < max_vec_size);
+
+	// for (int j = 0; j < detectedKeypoints[i].size(); j++) {
+	// 	if (detectedKeypoints.at(i).size() < max_vec_size) {
+	// 		detectedKeypoints.at(i).push_back(KeyPoint(maxLoc, 0.00));
+	// 	}
+	// }
+}
 
 
 
-	cv::Point maxLoc;
+cv::Point maxLoc;
 
-	for (int i = 0; i < detectedKeypoints.size(); i++) {
-		for (int j = 0; j < detectedKeypoints[i].size(); j++) {
-			if (detectedKeypoints.at(i).size() < numberOfPersons) {
-				detectedKeypoints.at(i).push_back(KeyPoint(maxLoc, 0.00));
-			}
+for (int i = 0; i < detectedKeypoints.size(); i++) {
+	for (int j = 0; j < detectedKeypoints[i].size(); j++) {
+		if (detectedKeypoints.at(i).size() < numberOfPersons) {
+			detectedKeypoints.at(i).push_back(KeyPoint(maxLoc, 0.00));
 		}
 	}
-  
-  kpVector.push_back(to_string(detectedKeypointsCopy.at(i).at(j).point.x) 
-			+ ","  
-			+ to_string(detectedKeypointsCopy.at(i).at(j).point.y)
-			+ "," 
-			+ to_string(detectedKeypointsCopy.at(i).at(j).score));
+}
+
+kpVector.push_back(to_string(detectedKeypointsCopy.at(i).at(j).point.x) 
+		+ ","  
+		+ to_string(detectedKeypointsCopy.at(i).at(j).point.y)
+		+ "," 
+		+ to_string(detectedKeypointsCopy.at(i).at(j).score));
