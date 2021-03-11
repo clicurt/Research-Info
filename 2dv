@@ -68,3 +68,20 @@ kpVector.push_back(to_string(detectedKeypointsCopy.at(i).at(j).point.x)
 		+ to_string(detectedKeypointsCopy.at(i).at(j).point.y)
 		+ "," 
 		+ to_string(detectedKeypointsCopy.at(i).at(j).score));
+
+
+
+void prepareDetectedPersonData(int numberOfPersons, std::vector<std::vector<KeyPoint>>& detectedKeypoints) {
+	int max_vec_size =  numberOfPersons;
+	for (int i = 0; i < detectedKeypoints.size(); i++) {
+		if (detectedKeypoints.at(i).size() > max_vec_size) {
+			max_vec_size = detectedKeypoints.at(i).size();
+		}
+	}
+	cv::Point maxLoc;
+
+	for (int i = 0; i < detectedKeypoints.size(); i++) {
+		while (detectedKeypoints.at(i).size() < max_vec_size) 
+			detectedKeypoints.at(i).push_back(KeyPoint(maxLoc, 0.00));
+	}
+}
