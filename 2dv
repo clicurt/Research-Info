@@ -85,3 +85,49 @@ void prepareDetectedPersonData(int numberOfPersons, std::vector<std::vector<KeyP
 			detectedKeypoints.at(i).push_back(KeyPoint(maxLoc, 0.00));
 	}
 }
+
+*************************************************************************
+template <typename T>
+std::vector<T> flatten(const std::vector<std::vector<T>> &orig) {
+  std::vector<T> ret;
+  for (const auto &v : orig)
+    ret.insert(ret.end(), v.begin(), v.end());
+  return ret;
+}
+
+auto flattenedDetected = flatten(detectedKeypoints);
+vector<vector<KeyPoint>> people;
+
+	for (int j = 0; j < personwiseKeypoints.size(); j++) {
+		std::vector<KeyPoint> person;
+		for (int k = 0; k < personwiseKeypoints.at(j).size(); k++) {
+			cv::Point maxLoc(-1,-1);
+			if (personwiseKeypoints.at(j).at(k) == -1) {
+				person.push_back(KeyPoint(maxLoc, 0));
+			} else {
+				person.push_back(flattenedDetected.at(personwiseKeypoints.at(j).at(k)));
+			}
+		}
+		people.push_back(person);
+	}
+
+
+		body.limb1 = to_string(joint.at(0).point.x) + "," + to_string(joint.at(0).point.y) + "," + to_string(joint.at(0).score);
+		body.limb2 = to_string(joint.at(1).point.x) + "," + to_string(joint.at(1).point.y) + "," + to_string(joint.at(1).score);
+		body.limb3 = to_string(joint.at(2).point.x) + "," + to_string(joint.at(2).point.y) + "," + to_string(joint.at(2).score);
+		body.limb4 = to_string(joint.at(3).point.x) + "," + to_string(joint.at(3).point.y) + "," + to_string(joint.at(3).score);
+		body.limb5 = to_string(joint.at(4).point.x) + "," + to_string(joint.at(4).point.y) + "," + to_string(joint.at(4).score);
+		body.limb6 = to_string(joint.at(5).point.x) + "," + to_string(joint.at(5).point.y) + "," + to_string(joint.at(5).score);
+		body.limb7 = to_string(joint.at(6).point.x) + "," + to_string(joint.at(6).point.y) + "," + to_string(joint.at(6).score);
+		body.limb8 = to_string(joint.at(7).point.x) + "," + to_string(joint.at(7).point.y) + "," + to_string(joint.at(7).score);
+		body.limb9 = to_string(joint.at(8).point.x) + "," + to_string(joint.at(8).point.y) + "," + to_string(joint.at(8).score);
+		body.limb10 = to_string(joint.at(9).point.x) + "," + to_string(joint.at(9).point.y) + "," + to_string(joint.at(9).score);
+		body.limb11 = to_string(joint.at(10).point.x) + "," + to_string(joint.at(10).point.y) + "," + to_string(joint.at(10).score);
+		body.limb12 = to_string(joint.at(11).point.x) + "," + to_string(joint.at(11).point.y) + "," + to_string(joint.at(11).score);
+		body.limb13 = to_string(joint.at(12).point.x) + "," + to_string(joint.at(12).point.y) + "," + to_string(joint.at(12).score);
+		body.limb14 = to_string(joint.at(13).point.x) + "," + to_string(joint.at(13).point.y) + "," + to_string(joint.at(13).score);
+		body.limb15 = to_string(joint.at(14).point.x) + "," + to_string(joint.at(14).point.y) + "," + to_string(joint.at(14).score);
+		body.limb16 = to_string(joint.at(15).point.x) + "," + to_string(joint.at(15).point.y) + "," + to_string(joint.at(15).score);
+		body.limb17 = to_string(joint.at(16).point.x) + "," + to_string(joint.at(16).point.y) + "," + to_string(joint.at(16).score);
+		body.limb18 = to_string(joint.at(17).point.x) + "," + to_string(joint.at(17).point.y) + "," + to_string(joint.at(17).score);
+
