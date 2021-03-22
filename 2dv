@@ -115,6 +115,7 @@ void prepareDetectedPersonData(std::vector<std::vector<int>>& personwiseKeypoint
 
 auto flattenedDetected = flatten(detectedKeypoints);
 vector<vector<KeyPoint>> people;
+    prepareDetectedPersonData(personwiseKeypoints, detectedKeypoints, people);
 
 	for (int j = 0; j < personwiseKeypoints.size(); j++) {
 		std::vector<KeyPoint> person;
