@@ -95,6 +95,24 @@ std::vector<T> flatten(const std::vector<std::vector<T>> &orig) {
   return ret;
 }
 
+void prepareDetectedPersonData(std::vector<std::vector<int>>& personwiseKeypoints, std::vector<std::vector<KeyPoint>>& detectedKeypoints, std::vector<std::vector<KeyPoint>>& people) {
+	auto flattenedDetected = flatten(detectedKeypoints);
+	for (int j = 0; j < personwiseKeypoints.size(); j++) {
+		std::vector<KeyPoint> person;
+		for (int k = 0; k < personwiseKeypoints.at(j).size(); k++) {
+			cv::Point maxLoc(-1,-1);
+			if (personwiseKeypoints.at(j).at(k) == -1) {
+				person.push_back(KeyPoint(maxLoc, 0));
+			} else {
+				person.push_back(flattenedDetected.at(personwiseKeypoints.at(j).at(k)));
+			}
+		}
+		people.push_back(person);
+	}
+}
+
+
+
 auto flattenedDetected = flatten(detectedKeypoints);
 vector<vector<KeyPoint>> people;
 
